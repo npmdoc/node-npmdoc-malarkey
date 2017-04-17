@@ -1,0 +1,459 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/yuanqing/malarkey#readme">malarkey (v1.3.3)</a>
+</h1>
+<h4>Simulate a typewriter/ticker effect on a DOM element.</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.malarkey">module malarkey</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.malarkey.malarkey">
+            function <span class="apidocSignatureSpan"></span>malarkey
+            <span class="apidocSignatureSpan">(elem, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.malarkey.karma_conf">
+            function <span class="apidocSignatureSpan">malarkey.</span>karma_conf
+            <span class="apidocSignatureSpan">(config)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.malarkey.toString">
+            function <span class="apidocSignatureSpan">malarkey.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.malarkey.karma_conf">module malarkey.karma_conf</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.malarkey.karma_conf.karma_conf">
+            function <span class="apidocSignatureSpan">malarkey.</span>karma_conf
+            <span class="apidocSignatureSpan">(config)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.malarkey.toString">module malarkey.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.malarkey.toString.toString">
+            function <span class="apidocSignatureSpan">malarkey.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.malarkey" id="apidoc.module.malarkey">module malarkey</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.malarkey.malarkey" id="apidoc.element.malarkey.malarkey">
+        function <span class="apidocSignatureSpan"></span>malarkey
+        <span class="apidocSignatureSpan">(elem, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function Malarkey(elem, opts) {
+
+  // allow `Malarkey` to be called without the `new` keyword
+  var self = this;
+  if (!(self instanceof Malarkey)) {
+    return new Malarkey(elem, opts);
+  }
+
+  // default `opts`
+  opts = opts || {};
+  var loop = opts.loop;
+  var typeSpeed = opts.speed || opts.typeSpeed || 50;
+  var deleteSpeed = opts.speed || opts.deleteSpeed || 50;
+  var pauseDelay = opts.delay || opts.pauseDelay || 2000;
+  var postfix = opts.postfix || '';
+  var getter = opts.getter || function(elem) {
+    return elem.innerHTML;
+  };
+  var setter = opts.setter || function(elem, val) {
+    elem.innerHTML = val;
+  };
+
+  // the function queue
+  var fnQueue = [];
+  var argsQueue = [];
+  var i = -1;
+  var state = STOPPED;
+  var pauseCb = noop;
+  function enqueue(fn, args) {
+    fnQueue.push(fn);
+    argsQueue.push(args);
+    if (state != RUNNING) {
+      state = RUNNING;
+      // wait for the remaining functions to be enqueued
+      setTimeout(function() {
+        next();
+      }, 0);
+    }
+    return self;
+  }
+  function next() {
+    if (state != RUNNING) {
+      state = STOPPED;
+      pauseCb(elem);
+      pauseCb = noop;
+      return;
+    }
+    if (++i == fnQueue.length) {
+      if (!loop) {
+        i = fnQueue.length - 1; // set `i` to the last element of `fnQueue`
+        state = STOPPED;
+        return;
+      }
+      i = 0;
+    }
+    fnQueue[i].apply(null, [].concat(next, argsQueue[i]));
+  }
+
+  // internal functions that are `enqueued` via the respective public methods
+  function _type(cb, str, speed) {
+    var len = str.length;
+    if (!len) {
+      return cb();
+    }
+    (function t(i) {
+      setTimeout(function() {
+        setter(elem, getter(elem) + str[i]);
+        i += 1;
+        if (i &lt; len) {
+          t(i);
+        } else {
+          cb();
+        }
+      }, speed);
+    })(0);
+  }
+  function _delete(cb, x, speed) {
+    var curr = getter(elem);
+    var count = curr.length; // default to deleting entire contents of `elem`
+    if (x != null) {
+      if (typeof x == 'string') {
+        // delete the string `x` if and only if `elem` ends with `x`
+        if (endsWith(curr, x + postfix)) {
+          count = x.length + postfix.length;
+        } else {
+          count = 0;
+        }
+      } else {
+        // delete the last `x` characters from `elem`
+        if (x &gt; -1) {
+          count = Math.min(x, count);
+        }
+      }
+    }
+    if (!count) {
+      return cb();
+    }
+    (function d(count) {
+      setTimeout(function() {
+        var curr = getter(elem);
+        if (count) {
+          // drop last char
+          setter(elem, curr.substring(0, curr.length-1));
+          d(count - 1);
+        } else {
+          cb();
+        }
+      }, speed);
+    })(count);
+  }
+  function _clear(cb) {
+    setter(elem, '');
+    cb();
+  }
+  function _call(cb, fn) {
+    fn.call(cb, elem);
+  }
+
+  // expose the public methods
+  self.type = function(str, speed) {
+    return enqueue(_type, [str + postfix, speed || typeSpeed]);
+  };
+  self.delete = function(x, speed) {
+    return enqueue(_delete, [x, speed || deleteSpeed]);
+  };
+  self.clear = function() {
+    return enqueue(_clear);
+  };
+  self.pause = function(delay) {
+    return enqueue(setTimeout, [delay || pauseDelay]);
+  };
+  self.call = function(fn) {
+    return enqueue(_call, [fn]);
+  };
+  self.triggerPause = function(cb) {
+    state = STOPPING;
+    pauseCb = cb || noop;
+    return self;
+  };
+  self.triggerResume = function() {
+    if (state != RUNNING) { // ie. `STOPPED` or `STOPPING`
+      var prevState = state;
+      state = RUNNING;
+      if (prevState == STOPPED) {
+        next();
+      }
+    }
+    return self;
+  };
+  self.isRunning = function() {
+    return state != STOPPED; // ie. `RUNNING` or `STOPPING`
+  };
+
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.malarkey.karma_conf" id="apidoc.element.malarkey.karma_conf">
+        function <span class="apidocSignatureSpan">malarkey.</span>karma_conf
+        <span class="apidocSignatureSpan">(config)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">karma_conf = function (config) {
+  config.set({
+    basePath: '.',
+    autoWatch: true,
+    frameworks: ['jasmine', 'browserify'],
+    browsers: ['PhantomJS'],
+    plugins: [
+      'browserify-istanbul',
+      'karma-browserify',
+      'karma-coverage',
+      'karma-jasmine',
+      'karma-phantomjs-launcher',
+      'karma-spec-reporter'
+    ],
+    reporters: [
+      'coverage',
+      'spec'
+    ],
+    coverageReporter: {
+      dir: 'coverage/',
+      subdir: '.',
+      reporters: [
+        { type: 'lcov' },
+        { type: 'text' }
+      ]
+    },
+    preprocessors: {
+      'test/*.js': ['browserify']
+    },
+    browserify: {
+      transform: [
+        [
+          'browserify-istanbul',
+          {
+            ignore: ['**/node_modules/**', '**/test/**'],
+            defaultIgnore: true
+          }
+        ]
+      ]
+    },
+    files: [
+      'node_modules/jquery/dist/jquery.min.js',
+      'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
+      'test/*.js',
+      {
+        pattern: 'test/fixture.html',
+        included: false,
+        served: true,
+        watched: false
+      }
+    ]
+  });
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.malarkey.toString" id="apidoc.element.malarkey.toString">
+        function <span class="apidocSignatureSpan">malarkey.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.malarkey.karma_conf" id="apidoc.module.malarkey.karma_conf">module malarkey.karma_conf</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.malarkey.karma_conf.karma_conf" id="apidoc.element.malarkey.karma_conf.karma_conf">
+        function <span class="apidocSignatureSpan">malarkey.</span>karma_conf
+        <span class="apidocSignatureSpan">(config)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">karma_conf = function (config) {
+  config.set({
+    basePath: '.',
+    autoWatch: true,
+    frameworks: ['jasmine', 'browserify'],
+    browsers: ['PhantomJS'],
+    plugins: [
+      'browserify-istanbul',
+      'karma-browserify',
+      'karma-coverage',
+      'karma-jasmine',
+      'karma-phantomjs-launcher',
+      'karma-spec-reporter'
+    ],
+    reporters: [
+      'coverage',
+      'spec'
+    ],
+    coverageReporter: {
+      dir: 'coverage/',
+      subdir: '.',
+      reporters: [
+        { type: 'lcov' },
+        { type: 'text' }
+      ]
+    },
+    preprocessors: {
+      'test/*.js': ['browserify']
+    },
+    browserify: {
+      transform: [
+        [
+          'browserify-istanbul',
+          {
+            ignore: ['**/node_modules/**', '**/test/**'],
+            defaultIgnore: true
+          }
+        ]
+      ]
+    },
+    files: [
+      'node_modules/jquery/dist/jquery.min.js',
+      'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
+      'test/*.js',
+      {
+        pattern: 'test/fixture.html',
+        included: false,
+        served: true,
+        watched: false
+      }
+    ]
+  });
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.malarkey.toString" id="apidoc.module.malarkey.toString">module malarkey.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.malarkey.toString.toString" id="apidoc.element.malarkey.toString.toString">
+        function <span class="apidocSignatureSpan">malarkey.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
