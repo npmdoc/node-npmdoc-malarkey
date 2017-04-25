@@ -1,4 +1,7 @@
-# api documentation for  [malarkey (v1.3.3)](https://github.com/yuanqing/malarkey#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-malarkey.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-malarkey) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-malarkey.svg)](https://travis-ci.org/npmdoc/node-npmdoc-malarkey)
+# npmdoc-malarkey
+
+#### basic api documentation for  [malarkey (v1.3.3)](https://github.com/yuanqing/malarkey#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-malarkey.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-malarkey) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-malarkey.svg)](https://travis-ci.org/npmdoc/node-npmdoc-malarkey)
+
 #### Simulate a typewriter/ticker effect on a DOM element.
 
 [![NPM](https://nodei.co/npm/malarkey.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/malarkey)
@@ -75,7 +78,8 @@
     "scripts": {
         "test": "gulp test"
     },
-    "version": "1.3.3"
+    "version": "1.3.3",
+    "bin": {}
 }
 ```
 
